@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SlabIndex – Pokémon Card Prices by Grade</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="w">
+<nav><a class="logo" href="#"><b>S</b>SlabIndex</a><div class="l"><a href="#cards">Cards</a><a href="#grades">Grades</a><a href="#features">Features</a> <a class="btn" href="#top" style="margin-left:22px;color:#1a1a1a">Search</a></div></nav>
+
+<section class="hero" id="top">
+<h1>Every Pokémon card.<br><span>Every grade. Every price.</span></h1>
+<p>See what a card is worth raw, and what a PSA 10 is worth, with live market prices and current eBay listings in one place.</p>
+<form class="search" id="sf"><input id="q" placeholder="Search a card, e.g. Pikachu GX" aria-label="Search cards"><button class="btn">Search</button></form>
+<div class="chips"><button data-q="Charizard">Charizard</button><button data-q="Pikachu">Pikachu</button><button data-q="Mewtwo">Mewtwo</button><button data-q="Umbreon">Umbreon</button><button data-q="Lugia">Lugia</button></div>
+</section>
+
+<div class="stats">
+<div class="stat"><b>All sets</b><span>from Base Set to today</span></div>
+<div class="stat"><b>7 grades</b><span>Raw, PSA, BGS, CGC</span></div>
+<div class="stat"><b>eBay</b><span>current listings</span></div>
+<div class="stat"><b>AI</b><span>coming soon</span></div>
+</div>
+
+<h2 id="cards">Trending cards</h2>
+<p class="sub" id="cardsub">Popular cards right now.</p>
+<div class="grid" id="grid"></div>
+
+<h2 id="grades">The grade premium, at a glance</h2>
+<p class="sub">Every card page shows the price at each grade and how much more it is worth than raw.</p>
+<div class="tbl"><table>
+<tr><th>Grade</th><th>Price</th><th>vs. Raw</th></tr>
+<tr><td>Raw (ungraded)</td><td>$10</td><td>1x</td></tr>
+<tr><td>PSA 8</td><td>$28</td><td class="x">2.8x</td></tr>
+<tr><td>PSA 9</td><td>$65</td><td class="x">6.5x</td></tr>
+<tr><td>PSA 10</td><td>$200</td><td class="x">20x</td></tr>
+</table></div>
+<p class="note">Sample numbers for illustration only. Real grade prices are coming in the next build.</p>
+
+<h2 id="features">What you'll get</h2>
+<p class="sub">Built for collectors, flippers and anyone deciding whether to grade.</p>
+<div class="feat">
+<div class="f"><em>🔎</em><h3>Full card database</h3><p>Set, number, rarity, artist and variants for every Pokémon card.</p></div>
+<div class="f"><em>📈</em><h3>Price by grade</h3><p>Raw through PSA 10 side by side, with the multiplier for each grade.</p></div>
+<div class="f"><em>🛒</em><h3>Live eBay listings</h3><p>See what is for sale now, matched to the right card and grade.</p></div>
+<div class="f"><em>🤖</em><h3>AI assistant</h3><p>Soon: smarter listing matching and "should I grade this?" advice.</p></div>
+</div>
+
+<div class="cta"><h2>Find your first card</h2><p>Search the database now. It's free.</p><a class="btn" href="#top">Start searching</a></div>
+</div>
+<footer>SlabIndex is not affiliated with Nintendo, The Pokémon Company, eBay, PSA, BGS or CGC. Card data from TCGdex.</footer>
+
+<script>
+var API="https://api.tcgdex.net/v2/en/cards",grid=document.getElementById("grid"),sub=document.getElementById("cardsub");
+var FEAT=["base1-4","base1-2","base1-15","base1-10","base1-58","neo1-9"];
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function usd(c){var t=c.pricing&&c.pricing.tcgplayer;if(!t)return"";for(var k in t){if(t[k]&&t[k].marketPrice)return"$"+t[k].marketPrice.toFixed(2)}return""}
+function tile(c){return'<a class="c" href="card.html?id='+encodeURIComponent(c.id)+'"><div class="img">'+(c.image?'<img loading="lazy" src="'+esc(c.image)+'/low.webp" alt="'+esc(c.name)+'">':esc(c.name))+'</div><h3>'+esc(c.name)+'</h3><small>'+esc(c.id)+'</small><div class="p"><span>'+(usd(c)||"View")+'</span><i>'+esc(c.rarity||"")+'</i></div></a>'}
+function get(u){return fetch(u).then(function(r){if(!r.ok)throw 0;return r.json()})}
+function featured(){sub.textContent="Popular cards right now.";
+ Promise.all(FEAT.map(function(i){return get(API+"/"+i).catch(function(){return null})})).then(function(a){a=a.filter(Boolean);if(!a.length)throw 0;grid.innerHTML=a.map(tile).join("")}).catch(function(){sub.textContent="Could not load cards. Please try again later.";grid.innerHTML=""})}
+function search(t){if(!t)return featured();sub.textContent='Results for "'+t+'"';grid.innerHTML="<p class=sub>Loading...</p>";
+ get(API+"?name="+encodeURIComponent(t)+"&pagination:page=1&pagination:itemsPerPage=24").then(function(a){var r=a.filter(function(c){return c.image});grid.innerHTML=r.length?r.map(tile).join(""):"<p class=sub>No cards found.</p>"}).catch(function(){grid.innerHTML="<p class=sub>Search failed. Please try again.</p>"})}
+document.getElementById("sf").onsubmit=function(e){e.preventDefault();search(document.getElementById("q").value.trim());document.getElementById("cards").scrollIntoView()};
+document.querySelectorAll(".chips button").forEach(function(b){b.onclick=function(){document.getElementById("q").value=b.dataset.q;search(b.dataset.q);document.getElementById("cards").scrollIntoView()}});
+featured();
+</script>
+</body>
+</html>

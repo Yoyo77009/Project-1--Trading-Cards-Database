@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Card – SlabIndex</title><link rel="stylesheet" href="style.css"></head><body>
+<div class="w"><nav><a class="logo" href="index.html"><b>S</b>SlabIndex</a></nav><a class="bk" href="index.html">&larr; Back to search</a><div id="app"><p class="sub">Loading card...</p></div></div>
+<footer>SlabIndex is not affiliated with Nintendo, The Pokémon Company, eBay, PSA, BGS or CGC. Card data from TCGdex.</footer>
+<script>
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var id=new URLSearchParams(location.search).get("id"),app=document.getElementById("app");
+var G=[["PSA 8",2.8],["PSA 9",6.5],["PSA 10",20]];
+function raw(c){var t=c.pricing&&c.pricing.tcgplayer,o=[];if(t)for(var k in t){if(t[k]&&t[k].marketPrice)o.push([k,t[k].marketPrice])}return o}
+fetch("https://api.tcgdex.net/v2/en/cards/"+encodeURIComponent(id)).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(c){
+ document.title=c.name+" – SlabIndex";var p=raw(c),base=p.length?p[0][1]:null,cm=c.pricing&&c.pricing.cardmarket;
+ var rows=p.map(function(x){return"<tr><td>Raw ("+esc(x[0])+")</td><td>$"+x[1].toFixed(2)+"</td><td>1x</td></tr>"}).join("");
+ var gr=base?G.map(function(g){return"<tr><td>"+g[0]+" (estimate)</td><td>$"+(base*g[1]).toFixed(2)+"</td><td class=x>"+g[1]+"x</td></tr>"}).join(""):"";
+ app.innerHTML='<div class="det"><div class="img">'+(c.image?'<img src="'+esc(c.image)+'/high.webp" alt="'+esc(c.name)+'">':esc(c.name))+'</div><div><h1 style="margin:0">'+esc(c.name)+'</h1><p class="meta">'+esc(c.set&&c.set.name)+' · #'+esc(c.localId)+' · '+esc(c.rarity||"")+(c.illustrator?" · Art: "+esc(c.illustrator):"")+(c.hp?" · HP "+esc(c.hp):"")+'</p>'
+ +'<h2 style="margin-top:0">Price by grade</h2>'+(base?'<div class="tbl"><table><tr><th>Grade</th><th>Price (USD)</th><th>vs. Raw</th></tr>'+rows+gr+'</table></div><p class="note">Raw prices: TCGplayer market price. Graded rows are placeholder estimates using sample multipliers, not real sales.'+(cm&&cm.trend?" Cardmarket trend: €"+Number(cm.trend).toFixed(2)+".":"")+'</p>':'<p class="sub">No price data available for this card.</p>')
+ +'<h2>Current eBay listings</h2><div class="ls">Coming soon: live listings for this card.</div></div></div>'
+}).catch(function(){app.innerHTML='<p class="sub">Could not load this card. <a href="index.html" style="text-decoration:underline">Go back</a></p>'});
+</script></body></html>
